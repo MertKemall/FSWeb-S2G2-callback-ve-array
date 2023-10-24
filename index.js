@@ -8,15 +8,24 @@ const { fifaData } = require('./fifa.js')
 
 //(a) 2014 Dünya kupası Finali Evsahibi takım ismi (dizide "Home Team Name" anahtarı)
 
+const EvSahibiFinal = Yillar(fifaData, Finaller).filter(match => match['Home Team Name']);
+console.log(EvSahibiFinal);
+
+
 //(b) 2014 Dünya kupası Finali Deplasman takım ismi  (dizide "Away Team Name" anahtarı)
+const DeplasmanFinal = Yillar(fifaData, Finaller).filter(match => match['Away Team Name']);
+console.log(DeplasmanFinal);
+
 
 //(c) 2014 Dünya kupası finali Ev sahibi takım golleri (dizide "Home Team Goals" anahtarı)
+const EvsahibiFinall=Yillar(fifaData,Finaller).filter(match=>match['Home Team Goals']);
+console.log(EvsahibiFinall);
 
 //(d)2014 Dünya kupası finali Deplasman takım golleri  (dizide "Away Team Goals" anahtarı)
-
+const DeplasmanFinalll=Yillar(fifaData,Finaller).filter(match=>match['Away Team Goals']);
+console.log(DeplasmanFinalll);
 //(e) 2014 Dünya kupası finali kazananı*/
-
-
+console.log(YillaraGoreKazananlar(fifaData, Finaller, Yillar, Kazananlar).filter(match=>match.Year===2014));
 /*  Görev 2: 
 	Finaller adlı fonksiyonu kullanarak aşağıdakileri uygulayın:
 	1. Bir dizi(array) olan Fifa datasını fonksiyonun birinci parametresi olarak alacak
@@ -25,11 +34,12 @@ const { fifaData } = require('./fifa.js')
 	💡 İPUCU - verilen data içindeki nesnelerin(objects) "Stage" anahtarına bakmalısınız
 */
 
-function Finaller(/* kodlar buraya */) {
-	
-    /* kodlar buraya */
-}
-
+function Finaller(fifadata) {
+	const newDizi = fifadata.filter(match => match.Stage === 'Final');
+	return newDizi;
+  }
+  
+//console.log(Finaller(fifaData));
 
 
 /*  Görev 3: 
@@ -39,10 +49,13 @@ function Finaller(/* kodlar buraya */) {
 	3. Finaller data setindeki tüm yılları içeren "years" adındaki diziyi(array) döndürecek
 	*/
 
-function Yillar(/* kodlar buraya */) {
-	
-    /* kodlar buraya */
-}
+	function Yillar(fifaData, FinallerFonk) {
+		const finaller = FinallerFonk(fifaData);
+		const years = finaller.map(match => match.Year);
+		return years;
+	  }
+	  
+	  console.log(Yillar(fifaData,Finaller));
 
 
 /*  Görev 4: 
@@ -52,12 +65,30 @@ function Yillar(/* kodlar buraya */) {
 	3. Her final maçının kazananını (evsahibi ya da deplasman) belirleyecek
 	💡 İPUCU: Beraberlikler(ties) için şimdilik endişelenmeyin (Detaylı bilgi için README dosyasına bakabilirsiniz.)
 	4. Tüm kazanan ülkelerin isimlerini içeren `kazananlar` adında bir dizi(array) döndürecek(return)  */ 
-
-function Kazananlar(/* kodlar buraya */) {
-	
-    /* kodlar buraya */
-	
-}
+	function Kazananlar(fifaData, FinallerFonk) {
+		const FinallerKazananlar = FinallerFonk(fifaData);
+		const kazanan=[];
+		FinallerKazananlar.forEach(finalMatch => {
+		  if (finalMatch['Home Team Goals'] > finalMatch['Away Team Goals']) {
+			kazanan.push(finalMatch['Home Team Name']);
+		  } else if (finalMatch['Home Team Goals'] < finalMatch['Away Team Goals']) {
+			kazanan.push(finalMatch['Away Team Name']);
+		  }
+		  else if(finalMatch['Home Team Goals'] === finalMatch['Away Team Goals']){
+			if(finalMatch['Half time Home  Goals'] === finalMatch['Half time Away  Goals']){
+				kazanan.push(finalMatch['Win conditions']);
+			}
+			else if(finalMatch['Half time Home  Goals'] > finalMatch['Half time Away  Goals']){
+				kazanan.push(finalMatch['Home Team Name']);
+			}
+			else{
+				kazanan.push(finalMatch['Away Team Name']);
+			}
+		  }
+		});
+	    return kazanan;
+	  }
+	  console.log(Kazananlar(fifaData,Finaller));
 
 
 
@@ -71,12 +102,22 @@ function Kazananlar(/* kodlar buraya */) {
 	
 	💡 İPUCU: her cümlenin adım 4'te belirtilen cümleyle birebir aynı olması gerekmektedir.
 */
-
-function YillaraGoreKazananlar(/* kodlar buraya */) {
-	
-/* kodlar buraya */
-
-}
+function YillaraGoreKazananlar(fifaData, Finaller, Yillar, Kazananlar) {
+	const yillar = Yillar(fifaData, Finaller);
+	const kazananlar = Kazananlar(fifaData, Finaller);
+	const newDizi=[];
+  
+	for (let i = 0; i < kazananlar.length; i++) {
+	  const yil = yillar[i];
+	  const kazanan = kazananlar[i];
+	  newDizi.push((`${yil} yılında, ${kazanan} dünya kupasını kazandı!`));
+	}
+	return newDizi;
+  }
+  
+  
+  console.log(YillaraGoreKazananlar(fifaData, Finaller, Yillar, Kazananlar));
+  
 
 
 /*  Görev 6: 
@@ -93,14 +134,13 @@ function YillaraGoreKazananlar(/* kodlar buraya */) {
 	
 */
 
-function OrtalamaGolSayisi(/* kodlar buraya */) {
-	
-    /* kodlar buraya */
-	
-}
-
-
-
+function OrtalamaGolSayisi(Finaller) {
+	let toplamsayısı=Finaller.reduce((toplamgol,match)=>toplamgol+ match["Home Team Goals"]+match["Away Team Goals"],0);
+	return (toplamsayısı/Finaller.length).toFixed(2);
+  }
+  
+  
+  
 /// EKSTRA ÇALIŞMALAR ///
 
 /*  BONUS 1:  
@@ -108,13 +148,40 @@ function OrtalamaGolSayisi(/* kodlar buraya */) {
 	
 	İpucu: "takım kısaltmaları" (team initials) için datada araştırma yapın!
 İpucu: `.reduce` Kullanın*/
+let kısaltmalar = Finaller(fifaData).reduce((total, mac) => {
+	if (!total.includes(mac["Home Team Initials"])) {
+	  total.push(mac["Home Team Initials"]);
+	}
+	if (!total.includes(mac["Away Team Initials"])) {
+	  total.push(mac["Away Team Initials"]);
+	}
+	return total;
+  }, []);
+  
 
-function UlkelerinKazanmaSayilari(/* kodlar buraya */) {
-	
-    /* kodlar buraya */
-	
+function UlkelerinKazanmaSayilari(fifadata,kısaltmalar) {
+	let deger = Finaller(fifadata).reduce((total,mac)=>{
+		let kazanan;
+		if(mac["Home Team Goals"]>mac["Away Team Goals"]){
+			kazanan=mac["Home Team Initials"]
+		}
+		else{
+			kazanan=mac["Away Team Initials"]
+		}
+		if(total[kazanan]==undefined){
+			total[kazanan]=1;
+		}
+		else{
+			total[kazanan]+=1;
+		}
+		return total;
+	},[]);
+	return deger;
 }
 
+  console.log(UlkelerinKazanmaSayilari(fifaData,kısaltmalar));
+  
+  
 
 
 /*  BONUS 2:  
